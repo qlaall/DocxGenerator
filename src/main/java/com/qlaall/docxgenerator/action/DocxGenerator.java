@@ -19,6 +19,16 @@ import java.util.function.Consumer;
 public class DocxGenerator {
     private static final Logger LOGGER = LoggerFactory.getLogger(DocxGenerator.class);
 
+    /**
+     * 正式生成时，首先对段落进行填充，也就是整段只有标记字符，匹配到后，由paragraphHandler进行处理
+     * 再进行表格的填充
+     * 表格填充完毕后，再进行文字的处理
+     * @param paragraphHandlerMap
+     * @param tableCellHandlerMap
+     * @param document
+     * @return
+     * @throws IOException
+     */
     public static byte[] fillDocx(Map<String, BiConsumer<XWPFDocument, XWPFParagraph>> paragraphHandlerMap,
                            Map<String, Consumer<XWPFTableCell>> tableCellHandlerMap,
                            XWPFDocument document) throws IOException {
@@ -34,12 +44,11 @@ public class DocxGenerator {
          */
         boolean proccessing = true;
         List<XWPFParagraph> paragraphs = docx.getParagraphs();
-        //处理paragraph
         while (proccessing) {
             for (int i = paragraphCursor; i < paragraphs.size(); i++) {
                 XWPFParagraph paragraph = paragraphs.get(i);
                 if (paragraphHandlerMap.get(paragraph.getText()) != null) {
-                    LOGGER.info("dealing paragraph with {}", paragraph.getText());
+                    LOGGER.debug("dealing paragraph with {}", paragraph.getText());
                     paragraphCursor = paragraphs.indexOf(paragraph);
                     paragraphHandlerMap.get(paragraph.getText()).accept(docx, paragraph);
                     paragraphCursor++;
@@ -55,7 +64,7 @@ public class DocxGenerator {
             for (XWPFTableRow row : table.getRows()) {
                 for (XWPFTableCell cell : row.getTableCells()) {
                     if (tableCellHandlerMap.get(cell.getText()) != null) {
-                        LOGGER.info("dealing tableCell with {}", cell.getText());
+                        LOGGER.debug("dealing tableCell with {}", cell.getText());
                         tableCellHandlerMap.get(cell.getText()).accept(cell);
                     }
                 }
@@ -64,7 +73,7 @@ public class DocxGenerator {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         docx.enforceUpdateFields();
         docx.write(byteArrayOutputStream);
-        LOGGER.info("DocxGenerator finish");
+        LOGGER.debug("DocxGenerator finish");
         return byteArrayOutputStream.toByteArray();
     }
 }
