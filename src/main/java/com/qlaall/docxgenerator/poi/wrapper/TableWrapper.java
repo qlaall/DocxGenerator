@@ -1,4 +1,4 @@
-package com.qlaall.docxgenerator.poi;
+package com.qlaall.docxgenerator.poi.wrapper;
 
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
